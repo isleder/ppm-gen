@@ -1,4 +1,4 @@
-# simple test program 
+# simple test program
 # generating packets
 # for the arduino board
 # specify port number and a series of channel values
@@ -27,7 +27,7 @@ packet.append(0x01) # start byte
 packet.append(count) # length
 packet.append(0x01) # type
 
-try: #test for string to int cast
+try: # test for string to int cast
 	for ch in channels:
 		ch = int(ch)
 		b = (ch & 0x000000ff)
@@ -36,8 +36,8 @@ try: #test for string to int cast
 		packet.append(b)
 
 except Exception, e:
-	print e		
-	exit(1)	
+	print e
+	exit(1)
 
 checksum = 0
 
@@ -46,7 +46,6 @@ for p in packet:
 
 packet.append(checksum & 0x000000FF) # leave only lower checksum byte
 packet.append(0x04) # end byte
-
 
 for b in packet:
 	sys.stdout.write(format(b, '02x'))
@@ -58,10 +57,9 @@ try:
 	#ser = serial.Serial(port, BAUDRATE, parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE, bytesize=serial.EIGHTBITS, timeout=0)
 
 except Exception, e:
-	print e		
-	exit(1)	
+	print e
+	exit(1)
 
-ser.write(packet)	
-
+ser.write(packet)
 ser.flush()
-ser.close()		
+ser.close()
