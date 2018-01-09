@@ -56,7 +56,7 @@ and set/read through serial port commands
 
 usb2train.py is a simple python test program
 *********************************************/
-
+#include <avr/io.h>
 #include "sio.h"
 #include "config.h"
 
@@ -64,13 +64,13 @@ uint32_t ppm_timer = 0; // ppm timout timer
 
 volatile uint8_t ppm_ch = 0; // current ppm channel count
 volatile uint16_t ppm_channels_total; // sum of pulse widths
-volatile ppm_channel_buff_t ppm_channels[2]; // double buffered ppm channels
+volatile struct ppm_channel_buff_t ppm_channels[2]; // double buffered ppm channels
 volatile uint8_t ppm_active_buff = 0; // current active buffer to read from
 volatile uint16_t ch_val = PPM_INTERVAL; // next channel timing
-volatile bool ppm_timeout = true;
-volatile bool ppm_off = true; // turns off ppm pulse at the sync
+volatile uint8_t ppm_timeout = 1;
+volatile uint8_t ppm_off = 1; // turns off ppm pulse at the sync
 
-packet_t sio_rx_packet; // incoming packet from serial port
+struct packet_t sio_rx_packet; // incoming packet from serial port
 
 /******************************************
  * timer1 overflow interrupt
@@ -79,7 +79,7 @@ packet_t sio_rx_packet; // incoming packet from serial port
  *****************************************/
 ISR(TIMER1_OVF_vect)
 {
-	volatile ppm_channel_buff_t *ppm_ch_buff; // pointer to active buffer
+	volatile struct ppm_channel_buff_t *ppm_ch_buff; // pointer to active buffer
 
 	ppm_ch_buff = &ppm_channels[ppm_active_buff];
 
@@ -120,13 +120,13 @@ ISR(TIMER1_OVF_vect)
 		// output branch to turn off via ppm_off
 		if (ppm_timeout)
 		{
-			ppm_off = true;
+			ppm_off = 1;
 			OCR1A = 0xFFFF; // stop pulses
 		}
 		else
 		{
 			OCR1A = ch_val - PPM_PULSE_WIDTH;
-			ppm_off = false;
+			ppm_off = 0;
 			LEDYELLOW_INV(); // flip yellow led to indicate output pulses
 		}
 
@@ -159,16 +159,12 @@ void init()
 
   	// enable timer1 overflow interrupt
   	TIMSK1 |= (1 << TOIE1);
-
-	// setup serial port
-	Serial.begin(SERIAL_PORT_BAUD);
 }
 
 
 /* serial port task */
 void sio_rx_task()
 {
-
 	int c; // some odd reason Arduino use 16 bit signed int for Serial.read
 
 	while ((c = Serial.read()) > -1)
@@ -207,7 +203,7 @@ void sio_rx_task()
 			ppm_active_buff = dest;
 
 			ppm_timer = micros(); // clear timeout
-			ppm_timeout = false;
+			ppm_timeout = 0;
 		}
 		else if (res < 0) // error
 		{
@@ -237,7 +233,7 @@ void main_task()
 			LEDGREEN_OFF();
 			#ifndef PPM_NO_TIMEOUT
                         LEDYELLOW_OFF();
-			ppm_timeout = true;
+			ppm_timeout = 1;
 			#endif
 		}
 

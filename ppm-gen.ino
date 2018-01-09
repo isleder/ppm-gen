@@ -58,8 +58,8 @@ usb2train.py is a simple python test program
 *********************************************/
 
 #include <Arduino.h>
-#include "config.h"
-#include "main.h"
+#include "src/config.h"
+#include "src/main.h"
 
 /* arduino init */
 void setup()
