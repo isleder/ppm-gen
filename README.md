@@ -27,7 +27,8 @@ ch2  - upper byte
 0x04 - end byte
 ```  
 for example:  
-```01 11 01 dc 05 dc 05 dc 05 dc 05 dc 05 dc 05 59 04
+```
+01 11 01 dc 05 dc 05 dc 05 dc 05 dc 05 dc 05 59 04
 ```  
 outputs 6 channels pulse, each set to 1500us
 
